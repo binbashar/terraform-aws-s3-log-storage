@@ -33,9 +33,13 @@ resource "aws_s3_bucket" "default" {
       days = var.noncurrent_version_expiration_days
     }
 
-    noncurrent_version_transition {
-      days          = var.noncurrent_version_transition_days
-      storage_class = "GLACIER"
+    dynamic "noncurrent_version_transition" {
+      for_each = var.enable_glacier_transition ? [1] : []
+
+      content {
+        days          = var.noncurrent_version_transition_days
+        storage_class = "GLACIER"
+      }
     }
 
     transition {
@@ -43,9 +47,13 @@ resource "aws_s3_bucket" "default" {
       storage_class = "STANDARD_IA"
     }
 
-    transition {
-      days          = var.glacier_transition_days
-      storage_class = "GLACIER"
+    dynamic "transition" {
+      for_each = var.enable_glacier_transition ? [1] : []
+
+      content {
+        days          = var.glacier_transition_days
+        storage_class = "GLACIER"
+      }
     }
 
     expiration {
@@ -65,4 +73,16 @@ resource "aws_s3_bucket" "default" {
   }
 
   tags = module.default_label.tags
+}
+
+# Refer to the terraform documentation on s3_bucket_public_access_block at
+# https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
+# for the nuances of the blocking options
+resource "aws_s3_bucket_public_access_block" "default" {
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  block_public_acls       = var.block_public_acls
+  block_public_policy     = var.block_public_policy
+  ignore_public_acls      = var.ignore_public_acls
+  restrict_public_buckets = var.restrict_public_buckets
 }
