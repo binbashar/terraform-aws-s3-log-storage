@@ -1,44 +1,3 @@
-variable "namespace" {
-  type        = string
-  default     = ""
-  description = "Namespace (e.g. `cp` or `cloudposse`)"
-}
-
-variable "stage" {
-  type        = string
-  default     = ""
-  description = "Stage (e.g. `prod`, `dev`, `staging`)"
-}
-
-variable "environment" {
-  type        = string
-  default     = ""
-  description = "Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT'"
-}
-
-variable "name" {
-  type        = string
-  description = "Name  (e.g. `app` or `db`)"
-}
-
-variable "delimiter" {
-  type        = string
-  default     = "-"
-  description = "Delimiter to be used between `name`, `namespace`, `stage`, etc."
-}
-
-variable "attributes" {
-  type        = list(string)
-  default     = []
-  description = "Additional attributes (e.g. `policy` or `role`)"
-}
-
-variable "tags" {
-  type        = map(string)
-  default     = {}
-  description = "Additional tags (e.g. map('BusinessUnit`,`XYZ`)"
-}
-
 variable "acl" {
   type        = string
   description = "The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services"
@@ -63,12 +22,6 @@ variable "lifecycle_tags" {
   default     = {}
 }
 
-variable "region" {
-  type        = string
-  description = "If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee"
-  default     = ""
-}
-
 variable "force_destroy" {
   type        = bool
   description = "(Optional, Default:false ) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable"
@@ -84,7 +37,7 @@ variable "lifecycle_rule_enabled" {
 variable "versioning_enabled" {
   type        = bool
   description = "A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket"
-  default     = false
+  default     = true
 }
 
 variable "noncurrent_version_expiration_days" {
@@ -123,6 +76,12 @@ variable "expiration_days" {
   description = "Number of days after which to expunge the objects"
 }
 
+variable "abort_incomplete_multipart_upload_days" {
+  type        = number
+  default     = 5
+  description = "Maximum time (in days) that you want to allow multipart uploads to remain in progress"
+}
+
 variable "sse_algorithm" {
   type        = string
   default     = "AES256"
@@ -133,12 +92,6 @@ variable "kms_master_key_arn" {
   type        = string
   default     = ""
   description = "The AWS KMS master key ARN used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms"
-}
-
-variable "enabled" {
-  type        = bool
-  default     = true
-  description = "Set to `false` to prevent the module from creating any resources"
 }
 
 variable "block_public_acls" {
@@ -163,4 +116,52 @@ variable "restrict_public_buckets" {
   type        = bool
   default     = true
   description = "Set to `false` to disable the restricting of making the bucket public"
+}
+
+variable "access_log_bucket_name" {
+  type        = string
+  default     = ""
+  description = "Name of the S3 bucket where S3 access logs will be sent to"
+}
+
+variable "access_log_bucket_prefix" {
+  type        = string
+  default     = "logs/"
+  description = "Prefix to prepend to the current S3 bucket name, where S3 access logs will be sent to"
+}
+
+variable "allow_encrypted_uploads_only" {
+  type        = bool
+  default     = false
+  description = "Set to `true` to prevent uploads of unencrypted objects to S3 bucket"
+}
+
+variable "allow_ssl_requests_only" {
+  type        = bool
+  default     = true
+  description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
+}
+
+variable "versioning_mfa_delete_enabled" {
+  type        = string
+  default     = false
+  description = "Enable MFA delete for the bucket"
+}
+
+variable "bucket_notifications_enabled" {
+  type        = bool
+  description = "Send notifications for the object created events. Used for 3rd-party log collection from a bucket"
+  default     = false
+}
+
+variable "bucket_notifications_type" {
+  type        = string
+  description = "Type of the notification configuration. Only SQS is supported."
+  default     = "SQS"
+}
+
+variable "bucket_notifications_prefix" {
+  type        = string
+  description = "Prefix filter. Used to manage object notifications"
+  default     = ""
 }

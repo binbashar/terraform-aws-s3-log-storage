@@ -3,11 +3,8 @@ provider "aws" {
 }
 
 module "s3_log_storage" {
-  source = "../../"
-
-  region        = var.region
-  namespace     = var.namespace
-  stage         = var.stage
-  name          = var.name
+  source        = "../../"
   force_destroy = true
+
+  context = module.this.context
 }
